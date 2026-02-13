@@ -1,0 +1,87 @@
+# Minerva Document Classification System - .gitignore
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# === Database ===
+# Database files (SQLite)
+tecdoc/data/*.db
+tecdoc/data/*.db-wal
+tecdoc/data/*.db-shm
+
+# Backups (keep structure, ignore files)
+tecdoc/data/backups/*.db
+
+# === Logs ===
+tecdoc/logs/*.log
+*.log
+
+# === Files directory (actual documents) ===
+# This contains client documents and should not be committed
+Files/
+tecdoc/Files/
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# === Claude Code ===
+# Chat transcripts and local settings
+.claude/projects/
+.claude/settings.local.json
+
+# === Temporary files ===
+*.tmp
+*.bak
+*.orig
+~$*
+Thumbs.db
+desktop.ini
+
+# === OS specific ===
+# Windows
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# === Project specific ===
+# Test data
+test_data/
+temp/
+
+# Configuration overrides (keep example, ignore local)
+# *_local.json
+# config.local.*
