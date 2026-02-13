@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Documenti - Minerva{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <form method="GET" action="{{ url_for('documents_list') }}" id="filterForm">
+            <div class="sidebar-section">
+                <label class="sidebar-label">Cliente</label>
+                <select name="cliente" id="clienteSelect" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Tutti --</option>
+                    {% for c in clienti %}
+                    <option value="{{ c }}" {% if c == f_cliente %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if dir_tree %}
+            <div class="sidebar-section">
+                <label class="sidebar-label">Directory</label>
+                <div class="dir-tree">
+                    <a href="{{ url_for('documents_list', cliente=f_cliente, titolo=f_titolo, contenuto=f_contenuto, stato=f_stato) }}"
+                       class="dir-item {% if not f_directory %}active{% endif %}">/ (tutte)</a>
+                    {% for d in dir_tree %}
+                    <a href="{{ url_for('documents_list', cliente=f_cliente, directory=d, titolo=f_titolo, contenuto=f_contenuto, stato=f_stato) }}"
+                       class="dir-item {% if d == f_directory %}active{% endif %}"
+                       style="padding-left: {{ (d.split('/') | length) * 12 + 8 }}px">
+                        {{ d.split('/') | last }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Filtri -->
+            <div class="sidebar-section">
+                <label class="sidebar-label">Titolo / Nome file</label>
+                <input type="text" name="titolo" value="{{ f_titolo }}" class="form-input" placeholder="Cerca nel titolo o nome file...">
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Parole chiave / Contenuto</label>
+                <input type="text" name="contenuto" value="{{ f_contenuto }}" class="form-input" placeholder="Cerca in parole chiave, sommario...">
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Area</label>
+                <select name="id_area" class="form-select">
+                    <option value="">-- Tutte --</option>
+                    {% for a in aree %}
+                    <option value="{{ a.id_area }}" {% if a.id_area|string == f_id_area %}selected{% endif %}>{{ a.cod_area }} - {{ a.descrizione }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Stato</label>
+                <select name="stato" class="form-select">
+                    <option value="">-- Tutti --</option>
+                    {% for s in stati %}
+                    <option value="{{ s.stato_codice }}" {% if s.stato_codice == f_stato %}selected{% endif %}>{{ s.stato_codice }} - {{ s.stato_descrizione }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Classificazione</label>
+                <select name="classificazione" class="form-select">
+                    <option value="">-- Tutte --</option>
+                    <option value="Non Classificato" {% if f_classificazione == 'Non Classificato' %}selected{% endif %}>Non Classificato</option>
+                    <option value="Parzialmente Classificato" {% if f_classificazione == 'Parzialmente Classificato' %}selected{% endif %}>Parzialmente Classificato</option>
+                    <option value="Classificato" {% if f_classificazione == 'Classificato' %}selected{% endif %}>Classificato</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Settore</label>
+                <select name="id_settore" class="form-select">
+                    <option value="">-- Tutti --</option>
+                    {% for s in settori %}
+                    <option value="{{ s.id_settore }}" {% if s.id_settore|string == f_id_settore %}selected{% endif %}>{{ s.cod_settore }} - {{ s.descrizione }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Attivo</label>
+                <select name="attivo" class="form-select">
+                    <option value="">-- Tutti --</option>
+                    <option value="1" {% if f_attivo == '1' %}selected{% endif %}>Si</option>
+                    <option value="0" {% if f_attivo == '0' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <!-- Mantieni parametri nascosti -->
+            <input type="hidden" name="directory" value="{{ f_directory }}">
+
+            <button type="submit" class="btn btn-primary btn-block">Filtra</button>
+            <a href="{{ url_for('documents_list') }}" class="btn btn-secondary btn-block">Reset</a>
+        </form>
+    </aside>
+
+    <!-- Main content -->
+    <div class="main-panel">
+        <div class="results-header">
+            <span class="results-count">{{ total }} documenti trovati</span>
+            <div class="pagination-controls">
+                <label>Per pagina:
+                    <select onchange="window.location.search = window.location.search.replace(/per_page=\d+/, '') + '&per_page=' + this.value">
+                        {% for pp in [25, 50, 100] %}
+                        <option value="{{ pp }}" {% if per_page == pp %}selected{% endif %}>{{ pp }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <table class="doc-table">
+            <thead>
+                <tr>
+                    <th>Nome File</th>
+                    <th>Titolo</th>
+                    <th>Stato</th>
+                    <th>Classif.</th>
+                    <th>Rev.</th>
+                    <th>Ultima Modifica</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr class="{{ _row_class(doc) }}">
+                    <td class="col-name" title="{{ doc.percorso_relativo }}">
+                        <a href="{{ url_for('document_detail', doc_id=doc.id_documento) }}">{{ doc.documento_nome_file }}</a>
+                        {% if doc._rev_count > 0 %}
+                        <div class="rev-list">
+                            <span class="rev-toggle" onclick="this.parentElement.classList.toggle('open')">{{ doc._rev_count }} versioni precedenti</span>
+                            <ul class="rev-links">
+                                {% for rev in doc._revisions %}
+                                <li>
+                                    <a href="{{ url_for('document_detail', doc_id=rev.id_documento) }}">{{ rev.documento_nome_file }}</a>
+                                    <span class="rev-meta">{{ rev.documento_revisione or '' }} - {{ rev.documento_data_creazione or '' }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="col-title">{{ doc.documento_titolo or '' }}</td>
+                    <td class="col-stato"><span class="badge badge-{{ doc.stato | lower }}">{{ doc.stato }}</span></td>
+                    <td class="col-classif">{{ doc.classificazione | truncate(15) }}</td>
+                    <td class="col-rev">{{ doc.documento_revisione or '' }}</td>
+                    <td class="col-date">{{ doc.documento_data_ultima_modifica or '' }}</td>
+                    <td class="col-actions">
+                        <a href="{{ url_for('document_open', doc_id=doc.id_documento) }}" class="btn btn-sm btn-open" target="_blank" title="Apri documento" onclick="event.stopPropagation()">Apri</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="empty-row">Nessun documento trovato</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Paginazione -->
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="{{ url_for('documents_list', page=page-1, cliente=f_cliente, titolo=f_titolo, contenuto=f_contenuto, stato=f_stato, classificazione=f_classificazione, attivo=f_attivo, id_area=f_id_area, id_settore=f_id_settore, directory=f_directory, per_page=per_page) }}" class="page-link">&laquo; Prec</a>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                <span class="page-link active">{{ p }}</span>
+                {% elif p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2) %}
+                <a href="{{ url_for('documents_list', page=p, cliente=f_cliente, titolo=f_titolo, contenuto=f_contenuto, stato=f_stato, classificazione=f_classificazione, attivo=f_attivo, id_area=f_id_area, id_settore=f_id_settore, directory=f_directory, per_page=per_page) }}" class="page-link">{{ p }}</a>
+                {% elif p == 4 or p == total_pages - 3 %}
+                <span class="page-link dots">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <a href="{{ url_for('documents_list', page=page+1, cliente=f_cliente, titolo=f_titolo, contenuto=f_contenuto, stato=f_stato, classificazione=f_classificazione, attivo=f_attivo, id_area=f_id_area, id_settore=f_id_settore, directory=f_directory, per_page=per_page) }}" class="page-link">Succ &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

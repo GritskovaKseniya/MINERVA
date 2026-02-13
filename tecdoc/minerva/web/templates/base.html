@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Minerva{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-left">
+            <a href="{{ url_for('documents_list') }}" class="logo">MINERVA</a>
+            <span class="subtitle">Classificatore Documenti</span>
+        </div>
+        <nav class="topbar-right">
+            <a href="{{ url_for('documents_list') }}" class="nav-link{% if request.endpoint == 'documents_list' %} active{% endif %}">Documenti</a>
+            <a href="{{ url_for('search') }}" class="nav-link{% if request.endpoint == 'search' %} active{% endif %}">Ricerca</a>
+            <a href="{{ url_for('clienti_list') }}" class="nav-link{% if request.endpoint == 'clienti_list' %} active{% endif %}">Clienti</a>
+        </nav>
+    </header>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

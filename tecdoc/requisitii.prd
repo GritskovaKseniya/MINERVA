@@ -1,0 +1,14 @@
+Considera le specifiche del file "GPT&Friends.Minerva.ClassificatoreDocumenti.SpecificheTecniche.R00.docx" nella cartella di progetto e la cartella 
+"C:\Nextcloud\LavoroCloud\Tibel" come cartella contenente i documenti da analizzare.
+
+Sulla traccia del documento di specifica crea un programma python che analizzi tutti i file contenuti nella cartella documenti, estragga utilizzando l'installazione locale di ollama tutti i dati possibili e li memorizzi in un db sqlserver.
+
+Il software dovrebbe essere formato da due parti: 
+1) una software di analisi cartella alla ricerca di files non precedentemente analizzati, analisi AI dei testi per l'estrazione delle informazioni
+2) un software di ricerca delle parole chiave o delle parole indicizzate, di visualizzazione e modifica dei record del db
+
+Il software 1 dovrebbe essere in grado di individuare se più files rappresentano revisioni diverse delle stesso file, memorizzando nel db in un unico record la versione più recente come "principale" e le altre ordinate per data decrescente come "precedenti".
+
+Il software 2 dovrebbe permettere di visualizzare la struttura delle directories e limitare la ricerca ad un sottoinsieme (mediante caselle di spunta).
+
+Crea un file PRD di specifiche di dettaglio e poni tutte le domande che ritieni necessarie per chiarire il progetto. Non effettuare per ora sviluppi.

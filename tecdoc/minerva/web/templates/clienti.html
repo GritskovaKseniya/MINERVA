@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Clienti - Minerva{% endblock %}
+
+{% block content %}
+<div class="clienti-page">
+    <h1>Gestione Clienti</h1>
+
+    <table class="doc-table">
+        <thead>
+            <tr>
+                <th>Cliente (Cartella)</th>
+                <th>Settore</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in clienti %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('documents_list', cliente=c.cliente_cartella) }}">{{ c.cliente_cartella }}</a>
+                </td>
+                <td>
+                    {% if c.settore_descrizione %}
+                        {{ c.cod_settore }} - {{ c.settore_descrizione }}
+                    {% else %}
+                        <em>Non assegnato</em>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('cliente_update_settore', cliente_cartella=c.cliente_cartella) }}" class="inline-form">
+                        <select name="id_settore" class="form-select form-select-sm">
+                            <option value="">-- Settore --</option>
+                            {% for s in settori %}
+                            <option value="{{ s.id_settore }}" {% if c.id_settore == s.id_settore %}selected{% endif %}>{{ s.cod_settore }} - {{ s.descrizione }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Salva</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="empty-row">Nessun cliente censito. Esegui prima lo scanner.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

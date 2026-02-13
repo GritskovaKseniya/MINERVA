@@ -1,0 +1,87 @@
+{
+    "database": {
+        "path": "./data/minerva.db",
+        "backup_enabled": true,
+        "backup_path": "./data/backups/"
+    },
+    "percorsi_base": [
+        {
+            "nome": "TecDoc",
+            "percorso": "E:\\Sviluppo\\Development\\MINERVA\\Files\\TECDOC",
+            "tipo": "clienti"
+        }
+    ],
+    "scanner": {
+        "filtro_globale_default": {
+            "formati_da_leggere": ["*.docx", "*.doc", "*.pdf", "*.xlsx", "*.xls", "*.txt", "*.xml", "*.sql", "*.cmd", "*.ksh", "*.eml", "*.ppt", "*.pptx", "*.mpp"],
+            "filtro_data": {
+                "usa_giorni_all_indietro": false,
+                "giorni_all_indietro": null,
+                "data_inizio": null,
+                "data_fine": null
+            }
+        },
+        "hash_algorithm": "sha256",
+        "max_file_size_mb": 100,
+        "utente_scanner": "MINERVA_SCANNER",
+        "file_esclusi_regex": [
+            "^~",
+            "^\\.",
+            "^Thumbs\\.db$",
+            "^desktop\\.ini$",
+            "^ehthumbs\\.db$",
+            "\\.tmp$",
+            "\\.bak$",
+            "\\.lnk$"
+        ]
+    },
+    "classificazione": {
+        "aree": [
+            {"codice": "ALL", "descrizione": "All Topics - Jolly che include tutti gli argomenti"},
+            {"codice": "APS", "descrizione": "Advanced Planning and Scheduling"},
+            {"codice": "BI", "descrizione": "Business Intelligence"},
+            {"codice": "FLEX3", "descrizione": "Integrazione con Flex3"},
+            {"codice": "IND", "descrizione": "Industry - Interconnessioni Macchine, Industry 4.0 e 5.0"},
+            {"codice": "INT", "descrizione": "Integrazione - Integrazioni con Sistemi Gestionali e Altri Sistemi Informativi Aziendali"},
+            {"codice": "JAD", "descrizione": "Jflex Advanced Dashboard - Cruscotti"},
+            {"codice": "KPI", "descrizione": "Rendicontazione e Reportistica ed Analisi KPI"},
+            {"codice": "MAN", "descrizione": "Manutenzione"},
+            {"codice": "MCS", "descrizione": "Manufacturing Control System"},
+            {"codice": "MES", "descrizione": "MES & MOM - Manufacturing Execution System / Manufacturing Operations Management"},
+            {"codice": "NC", "descrizione": "Non Conformità"},
+            {"codice": "OPM", "descrizione": "Operation Management"},
+            {"codice": "POR", "descrizione": "Porting di versione"},
+            {"codice": "QLT", "descrizione": "Gestione Qualità"},
+            {"codice": "REP", "descrizione": "Reportistica/Stampe"},
+            {"codice": "SCC", "descrizione": "Supply Chain Collaboration"},
+            {"codice": "SEQ", "descrizione": "Sequenziatore"},
+            {"codice": "SFC", "descrizione": "Smart Factory Console"},
+            {"codice": "SI", "descrizione": "Standard Interface"},
+            {"codice": "SQL", "descrizione": "Query SQL"},
+            {"codice": "SYS", "descrizione": "Attività Sistemistica HW/SW"},
+            {"codice": "VAR", "descrizione": "Varie"},
+            {"codice": "WMS", "descrizione": "Warehouse Management System"}
+        ]
+    },
+    "ollama": {
+        "base_url": "http://localhost:11434",
+        "model": "llama3.2:latest",
+        "timeout_seconds": 300,
+        "max_retries": 3,
+        "max_text_chars": 100000,
+        "enabled": false
+    },
+    "web": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": false,
+        "results_per_page": 50
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "./logs/minerva.log",
+        "max_size_mb": 50,
+        "backup_count": 5,
+        "retention_hours": 24
+    }
+}

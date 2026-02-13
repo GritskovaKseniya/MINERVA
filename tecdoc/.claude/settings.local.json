@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(pip install:*)",
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(pushd:*)",
+      "Bash(popd:*)",
+      "Bash(cd:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python tools/extract_chat.py",
+            "async" : true
+          }
+        ]
+      }
+    ]
+  }
+}

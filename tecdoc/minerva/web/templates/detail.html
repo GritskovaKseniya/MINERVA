@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.documento_nome_file }} - Minerva{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="detail-header">
+        <a href="{{ url_for('documents_list', cliente=doc.cliente_cartella) }}" class="btn btn-secondary">&laquo; Torna alla lista</a>
+        <h1>{{ doc.documento_nome_file }}</h1>
+        <span class="badge badge-{{ doc.stato | lower }}">{{ doc.stato }}</span>
+        <a href="{{ url_for('document_open', doc_id=doc.id_documento) }}" class="btn btn-primary" target="_blank">Apri File</a>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Sezione Info File (sola lettura) -->
+        <section class="detail-section">
+            <h2>Informazioni File</h2>
+            <table class="info-table">
+                <tr><th>Percorso</th><td>{{ doc.percorso_base }}/{{ doc.percorso_relativo }}</td></tr>
+                <tr><th>Nome file</th><td>{{ doc.documento_nome_file }}</td></tr>
+                <tr><th>Estensione</th><td>{{ doc.documento_estensione or '' }}</td></tr>
+                <tr>
+                    <th>Dimensione</th>
+                    <td>
+                        {% if doc.documento_dimensione %}
+                            {% if doc.documento_dimensione > 1048576 %}
+                                {{ "%.1f"|format(doc.documento_dimensione / 1048576) }} MB
+                            {% elif doc.documento_dimensione > 1024 %}
+                                {{ "%.1f"|format(doc.documento_dimensione / 1024) }} KB
+                            {% else %}
+                                {{ doc.documento_dimensione }} bytes
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr><th>Data creazione</th><td>{{ doc.documento_data_creazione or '' }}</td></tr>
+                <tr><th>Ultima modifica</th><td>{{ doc.documento_data_ultima_modifica or '' }}</td></tr>
+                <tr><th>Hash SHA-256</th><td class="hash-value">{{ doc.documento_hash or '' }}</td></tr>
+                <tr><th>Stato</th><td><span class="badge badge-{{ doc.stato | lower }}">{{ doc.stato }}</span></td></tr>
+                <tr><th>Cliente</th><td>{{ doc.cliente_cartella }}</td></tr>
+            </table>
+        </section>
+
+        <!-- Sezione Metadati Estratti (sola lettura) -->
+        <section class="detail-section">
+            <h2>Metadati Estratti</h2>
+            <table class="info-table">
+                <tr><th>Autore</th><td>{{ doc.autore or '-' }}</td></tr>
+                <tr><th>Ultima modifica di</th><td>{{ doc.autore_ultima_modifica or '-' }}</td></tr>
+                <tr><th>Versione interna</th><td>{{ doc.versione_interna or '-' }}</td></tr>
+                <tr><th>Revisione</th><td>{{ doc.documento_revisione or '-' }}</td></tr>
+                {% if doc.titoli_estratti %}
+                <tr><th>Titoli estratti</th><td><pre class="extracted-text">{{ doc.titoli_estratti }}</pre></td></tr>
+                {% endif %}
+                {% if doc.indice_contenuti %}
+                <tr><th>Indice dei contenuti</th><td><pre class="extracted-text">{{ doc.indice_contenuti }}</pre></td></tr>
+                {% endif %}
+                {% if doc.sommario_estratto %}
+                <tr><th>Sommario AI</th><td><pre class="extracted-text">{{ doc.sommario_estratto }}</pre></td></tr>
+                {% endif %}
+            </table>
+
+            {% if metadati %}
+            <h3>Suggerimenti Automatici</h3>
+            <table class="info-table">
+                {% if metadati.aree_suggerite %}
+                <tr><th>Aree suggerite (auto)</th><td>{{ metadati.aree_suggerite | join(', ') }}</td></tr>
+                {% endif %}
+                {% if metadati.aree_suggerite_ai %}
+                <tr><th>Aree suggerite (AI)</th><td>{{ metadati.aree_suggerite_ai | join(', ') }}</td></tr>
+                {% endif %}
+                {% if metadati.tipo_doc_suggerito %}
+                <tr><th>Tipo doc suggerito (auto)</th><td>{{ metadati.tipo_doc_suggerito }}</td></tr>
+                {% endif %}
+                {% if metadati.tipo_doc_suggerito_ai %}
+                <tr><th>Tipo doc suggerito (AI)</th><td>{{ metadati.tipo_doc_suggerito_ai }}</td></tr>
+                {% endif %}
+            </table>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Form Classificazione -->
+    <form method="POST" action="{{ url_for('document_save', doc_id=doc.id_documento) }}">
+        <section class="detail-section">
+            <h2>Classificazione</h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Classificazione</label>
+                    <select name="classificazione" class="form-select">
+                        <option value="Non Classificato" {% if doc.classificazione == 'Non Classificato' %}selected{% endif %}>Non Classificato</option>
+                        <option value="Parzialmente Classificato" {% if doc.classificazione == 'Parzialmente Classificato' %}selected{% endif %}>Parzialmente Classificato</option>
+                        <option value="Classificato" {% if doc.classificazione == 'Classificato' %}selected{% endif %}>Classificato</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="attivo" value="1" {% if doc.attivo %}checked{% endif %}> Attivo
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Titolo</label>
+                    <input type="text" name="documento_titolo" value="{{ doc.documento_titolo or '' }}" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label>Progetto / Commessa</label>
+                    <input type="text" name="progetto" value="{{ doc.progetto or '' }}" class="form-input">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Descrizione</label>
+                    <textarea name="descrizione" class="form-textarea" rows="3" maxlength="4000">{{ doc.descrizione or '' }}</textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Parole chiave</label>
+                    <input type="text" name="documento_parole_chiave" value="{{ doc.documento_parole_chiave or '' }}" class="form-input" placeholder="Separate da virgola">
+                </div>
+            </div>
+        </section>
+
+        <!-- Classificazione Area/SottoArea/SubArea -->
+        <section class="detail-section">
+            <h2>Area / SottoArea / SubArea</h2>
+            <div id="classificazioni-container">
+                {% for cl in classificazioni %}
+                <div class="classif-row">
+                    <select name="area_ids[]" class="form-select area-select" onchange="loadSottoAree(this)">
+                        <option value="">-- Area --</option>
+                        {% for a in aree %}
+                        <option value="{{ a.id_area }}" {% if a.id_area == cl.id_area %}selected{% endif %}>{{ a.cod_area }} - {{ a.descrizione }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="sotto_area_ids[]" class="form-select sotto-area-select" onchange="loadSubAree(this)">
+                        <option value="">-- SottoArea --</option>
+                        {% for sa in sotto_aree %}
+                        {% if sa.id_area == cl.id_area %}
+                        <option value="{{ sa.id_sotto_area }}" {% if sa.id_sotto_area == cl.id_sotto_area %}selected{% endif %}>{{ sa.cod_sotto_area }} - {{ sa.descrizione }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <select name="sub_area_ids[]" class="form-select sub-area-select">
+                        <option value="">-- SubArea --</option>
+                        {% for sua in sub_aree %}
+                        {% if sua.id_sotto_area == cl.id_sotto_area %}
+                        <option value="{{ sua.id_sub_area }}" {% if sua.id_sub_area == cl.id_sub_area %}selected{% endif %}>{{ sua.cod_sub_area }} - {{ sua.descrizione }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">X</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addClassifRow()">+ Aggiungi classificazione</button>
+        </section>
+
+        <!-- Tipo Documento -->
+        <section class="detail-section">
+            <h2>Tipo Documento</h2>
+            <div class="checkbox-grid">
+                {% for td in tipi_doc %}
+                <label class="checkbox-label">
+                    <input type="checkbox" name="tipo_ids[]" value="{{ td.id_tipo_documento }}"
+                           {% if td.id_tipo_documento in tipi_doc_associati | map(attribute='id_tipo_documento') | list %}checked{% endif %}>
+                    {{ td.cod_tipo_documento }} - {{ td.descrizione }}
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- FIP -->
+        <section class="detail-section">
+            <h2>FIP (Fase Implementazione Progetto)</h2>
+            <div class="checkbox-grid">
+                {% for f in fip_list %}
+                <label class="checkbox-label">
+                    <input type="checkbox" name="fip_ids[]" value="{{ f.id_fip }}"
+                           {% if f.id_fip in fip_associati | map(attribute='id_fip') | list %}checked{% endif %}>
+                    {{ f.cod_fip }} - {{ f.descrizione }}
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Revisioni -->
+        {% if revisioni %}
+        <section class="detail-section">
+            <h2>Revisioni</h2>
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Nome File</th>
+                        <th>Revisione</th>
+                        <th>Ultima Modifica</th>
+                        <th>Stato</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rev in revisioni %}
+                    <tr class="{% if rev.id_documento == doc.id_documento %}current-rev{% endif %}">
+                        <td><a href="{{ url_for('document_detail', doc_id=rev.id_documento) }}">{{ rev.documento_nome_file }}</a></td>
+                        <td>{{ rev.documento_revisione or '-' }}</td>
+                        <td>{{ rev.documento_data_ultima_modifica or '' }}</td>
+                        <td><span class="badge badge-{{ rev.stato | lower }}">{{ rev.stato }}</span></td>
+                        <td><a href="{{ url_for('document_open', doc_id=rev.id_documento) }}" class="btn btn-sm btn-open" target="_blank">Apri</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Salva</button>
+            <a href="{{ url_for('documents_list', cliente=doc.cliente_cartella) }}" class="btn btn-secondary">Annulla</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const areeData = {{ aree | tojson }};
+
+function addClassifRow() {
+    const container = document.getElementById('classificazioni-container');
+    const row = document.createElement('div');
+    row.className = 'classif-row';
+    row.innerHTML = `
+        <select name="area_ids[]" class="form-select area-select" onchange="loadSottoAree(this)">
+            <option value="">-- Area --</option>
+            ${areeData.map(a => `<option value="${a.id_area}">${a.cod_area} - ${a.descrizione}</option>`).join('')}
+        </select>
+        <select name="sotto_area_ids[]" class="form-select sotto-area-select" onchange="loadSubAree(this)">
+            <option value="">-- SottoArea --</option>
+        </select>
+        <select name="sub_area_ids[]" class="form-select sub-area-select">
+            <option value="">-- SubArea --</option>
+        </select>
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">X</button>
+    `;
+    container.appendChild(row);
+}
+
+function loadSottoAree(select) {
+    const row = select.closest('.classif-row');
+    const saSelect = row.querySelector('.sotto-area-select');
+    const suaSelect = row.querySelector('.sub-area-select');
+    saSelect.innerHTML = '<option value="">-- SottoArea --</option>';
+    suaSelect.innerHTML = '<option value="">-- SubArea --</option>';
+
+    const areaId = select.value;
+    if (!areaId) return;
+
+    fetch(`/api/sotto_aree/${areaId}`)
+        .then(r => r.json())
+        .then(data => {
+            data.forEach(sa => {
+                const opt = document.createElement('option');
+                opt.value = sa.id_sotto_area;
+                opt.textContent = `${sa.cod_sotto_area} - ${sa.descrizione}`;
+                saSelect.appendChild(opt);
+            });
+        });
+}
+
+function loadSubAree(select) {
+    const row = select.closest('.classif-row');
+    const suaSelect = row.querySelector('.sub-area-select');
+    suaSelect.innerHTML = '<option value="">-- SubArea --</option>';
+
+    const saId = select.value;
+    if (!saId) return;
+
+    fetch(`/api/sub_aree/${saId}`)
+        .then(r => r.json())
+        .then(data => {
+            data.forEach(sua => {
+                const opt = document.createElement('option');
+                opt.value = sua.id_sub_area;
+                opt.textContent = `${sua.cod_sub_area} - ${sua.descrizione}`;
+                suaSelect.appendChild(opt);
+            });
+        });
+}
+</script>
+{% endblock %}
