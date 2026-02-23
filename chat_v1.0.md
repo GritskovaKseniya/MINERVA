@@ -2151,3 +2151,4 @@ Il file `chat.md` e' stato rigenerato con `--all`: contiene 42 messaggi utente, 
 Rimuovo i blocchi `<details>Ragionamento interno</details>` dall'output.
 
 ---
+prova
